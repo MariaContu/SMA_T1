@@ -6,6 +6,7 @@ import org.yaml.snakeyaml.Yaml;
 
 import java.io.FileReader;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 @SpringBootApplication
@@ -34,14 +35,26 @@ public class T1SmaApplication {
                 Map<String, Object> config = entry.getValue();
                 filas.put(key, new Fila(
                     (int) config.get("servers"),
-                    config.containsKey("capacity") ? (int) config.get("capacity") : Integer.MAX_VALUE,  // Capacidade infinita se não definida
+                    config.containsKey("capacity") ? (int) config.get("capacity") : Integer.MAX_VALUE,
                     (double) config.get("minService"),
                     (double) config.get("maxService")
                 ));
             }
 
+            // Carregando transições
+            Map<String, Map<String, Double>> transicoes = new HashMap<>();
+            List<Map<String, Object>> networkConfig = (List<Map<String, Object>>) data.get("network");
+            for (Map<String, Object> transition : networkConfig) {
+                String source = (String) transition.get("source");
+                String target = (String) transition.get("target");
+                double probability = (double) transition.get("probability");
+
+                transicoes.putIfAbsent(source, new HashMap<>());
+                transicoes.get(source).put(target, probability);
+            }
+
             // Executa a simulação
-            SimuladorFila simulador = new SimuladorFila(filas, chegadaQ1);
+            SimuladorFila simulador = new SimuladorFila(filas, chegadaQ1, transicoes);
             simulador.executarSimulacao(100000); // 100.000 eventos
 
         } catch (Exception e) {
