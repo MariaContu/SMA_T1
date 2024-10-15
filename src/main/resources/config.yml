@@ -25,7 +25,7 @@
 # 
 
 arrivals: 
-   Q1: 45.0
+   Q1: 2.0
 
 queues: 
    Q1: 
@@ -58,9 +58,15 @@ network:
 -  source: Q2
    target: Q3
    probability: 0.5
+-  source: Q2
+   target: exit
+   probability: 0.2
 -  source: Q3
    target: Q2
    probability: 0.7
+-  source: Q3
+   target: exit
+   probability: 0.3
 
 rndnumbers: 
 - 0.2176

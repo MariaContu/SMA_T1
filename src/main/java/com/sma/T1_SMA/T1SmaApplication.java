@@ -14,20 +14,20 @@ public class T1SmaApplication {
 
     public static void main(String[] args) {
         SpringApplication.run(T1SmaApplication.class, args);
-        executarSimulacao();  // Chama a execução da simulação após iniciar a aplicação
+        executarSimulacao();
     }
 
     private static void executarSimulacao() {
         Yaml yaml = new Yaml();
         try {
-            // Ajuste o caminho se o arquivo estiver em src/main/resources
+            // Leitura do arquivo YAML
             FileReader reader = new FileReader("src/main/resources/config.yml");
             Map<String, Object> data = yaml.load(reader);
 
-            // Carregando parâmetros
+            // Lendo o tempo de chegada do exterior (campo "arrivals" do .yml)
             double chegadaQ1 = (double) ((Map<String, Object>) data.get("arrivals")).get("Q1");
-
-            // Carregando filas
+        
+            // Configurando as filas
             Map<String, Fila> filas = new HashMap<>();
             Map<String, Map<String, Object>> filasConfig = (Map<String, Map<String, Object>>) data.get("queues");
             for (Map.Entry<String, Map<String, Object>> entry : filasConfig.entrySet()) {
@@ -41,7 +41,7 @@ public class T1SmaApplication {
                 ));
             }
 
-            // Carregando transições
+            // Configurando as transições de rede (roteamento)
             Map<String, Map<String, Double>> transicoes = new HashMap<>();
             List<Map<String, Object>> networkConfig = (List<Map<String, Object>>) data.get("network");
             for (Map<String, Object> transition : networkConfig) {
@@ -53,9 +53,9 @@ public class T1SmaApplication {
                 transicoes.get(source).put(target, probability);
             }
 
-            // Executa a simulação
-            SimuladorFila simulador = new SimuladorFila(filas, chegadaQ1, transicoes);
-            simulador.executarSimulacao(100000); // 100.000 eventos
+            // Inicializando o simulador com as filas, transições e o tempo de chegada
+            SimuladorFila simulador = new SimuladorFila(filas, chegadaQ1, transicoes, chegadaQ1);
+            simulador.executarSimulacao(100000); // Simulando 100.000 eventos
 
         } catch (Exception e) {
             e.printStackTrace();
